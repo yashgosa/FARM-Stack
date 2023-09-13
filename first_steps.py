@@ -64,9 +64,20 @@ async def read_item(item_id: str, needy: str, q: str | None = None, short: bool 
 class Item(BaseModel):
     name: str
     discription: str | None = None
-    price: str
+    price: float
     tax: float | None = None
 
-@app.post("/items/")
+@app.post("/model_items/")
 async def create_items(item: Item):
-    return item
+    item_dict = item.model_dump()
+    if item.tax:
+        price_with_tax = item.price + item.tax
+        item_dict.update({"price_with_tax": price_with_tax})
+    return item_dict
+
+@app.put('/model_items/{item_id}')
+async def create_item(item_id: int, item: Item, q: str | None = None):
+    result = {"item_id": item_id, **item.model_dump()}
+    if q:
+        result.update({"q": q})
+    return result
