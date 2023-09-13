@@ -5,9 +5,9 @@ GET: to read data.
 PUT: to update data.
 DELETE: to delete data."""
 # =========> Main Code <=========
-from fastapi import FastAPI, Query, Path  # FastAPI is a Python class that provides all the functionality for your API.
+from fastapi import FastAPI, Query, Path, Body  # FastAPI is a Python class that provides all the functionality for your API.
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Annotated
 
 app = FastAPI()
@@ -138,12 +138,62 @@ app = FastAPI()
 
 # =========> Path Parameters and Numeric Validations <=========
 
-@app.get("/items/{item_id}")
-async def read_items(
-        item_id: Annotated[str, Path(title="This variable contains the identity of item", gt=0, le=1000)],
-        q: Annotated[str, Query(max_length=43, gt=0, lt=0.5)] = None
-):
-    results = {"item_id": item_id}
-    if q:
-        results.update({"q": q})
-    return  results
+# @app.get("/items/{item_id}")
+# async def read_items(
+#         item_id: Annotated[str, Path(title="This variable contains the identity of item", gt=0, le=1000)],
+#         q: Annotated[str, Query(max_length=43, gt=0, lt=0.5)] = None
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     return  results
+
+# =========> Body - Multiple Parameters <=========
+
+# class Item(BaseModel):
+#     name: str
+#     price: int
+#     description: str | None
+#     tax: int | None
+#
+# class User(BaseModel):
+#     name: str
+#     full_name: str
+#
+# @app.put("/items")
+# def update_item(
+#         item_id: Annotated[int | None, Path(title="It contains list of all the items", ge=3, le=32)] = None,
+#         q: str | None = None,
+#         item: Annotated[Item | None, Body(embed=True)] = None
+# ):
+#     results = {"item_id": item_id}
+#     if q:
+#         results.update({"q": q})
+#     if item:
+#         results.update({"item": item})
+#     return results
+#
+# """{
+#     "item": {
+#         "name": "Foo",
+#         "description": "The pretender",
+#         "price": 42.0,
+#         "tax": 3.2
+#     }
+# }"""
+#
+# @app.get("/items/{item_id}")
+# def update_user(
+#         item_id: str,
+#         item: Item,
+#         user: User,
+#         importance: Annotated[int, Body(gt = 0)], TODO: Understand what body does?
+#         q : str | None = None
+# ):
+#     results = {"item_id": item_id, "user": user, "item": item, "importance": importance}
+#     if q: results.update({"q": q})
+#     return results
+
+# =========> Body - Fields <=========
+
+
