@@ -206,59 +206,62 @@ app = FastAPI()
 #     return {"item": item, "item_id": item_id}
 
 # =========> Body - Nested Models <=========
-class Image(BaseModel):
-    name: str
-    url: HttpUrl
+# class Image(BaseModel):
+#     name: str
+#     url: HttpUrl
+#
+# class BaseItem(BaseModel):
+#     name: str
+#     description: str | None
+#     price: int
+#     tax: int | None
+#     # tags : list[str] = []
+#     tags: set[str] = set()
+#     image: list[Image] | None = None
+#
+# class Offer(BaseModel):
+#     name: str
+#     description: str | None = None
+#     price: float
+#     items: list[BaseItem]
+#
+# """{
+#     "name": "Foo",
+#     "description": "The pretender",
+#     "price": 42.0,
+#     "tax": 3.2,
+#     "tags": [
+#         "rock",
+#         "metal",
+#         "bar"
+#     ],
+#     "images": [
+#         {
+#             "url": "http://example.com/baz.jpg",
+#             "name": "The Foo live"
+#         },
+#         {
+#             "url": "http://example.com/dave.jpg",
+#             "name": "The Baz"
+#         }
+#     ]
+# }"""
+#
+# @app.put("item/{item_id}")
+# async def update_item(item: BaseItem, item_id: int):
+#     results = {"item": item, "item_id": item_id}
+#
+# @app.post("/offers")
+# async def create_offer(offer: Offer):
+#     return Offer
+#
+# @app.post("/images/multiple")
+# async def create_multiple_images(images: list[Image]):
+#     return images
+#
+# @app.post("/index-weights/")
+# async def create_index_weights(weights: dict[int, float]):
+#     return weights
 
-class BaseItem(BaseModel):
-    name: str
-    description: str | None
-    price: int
-    tax: int | None
-    # tags : list[str] = []
-    tags: set[str] = set()
-    image: list[Image] | None = None
+# =========> Declare Request Example Data <=========
 
-class Offer(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    items: list[BaseItem]
-
-"""{
-    "name": "Foo",
-    "description": "The pretender",
-    "price": 42.0,
-    "tax": 3.2,
-    "tags": [
-        "rock",
-        "metal",
-        "bar"
-    ],
-    "images": [
-        {
-            "url": "http://example.com/baz.jpg",
-            "name": "The Foo live"
-        },
-        {
-            "url": "http://example.com/dave.jpg",
-            "name": "The Baz"
-        }
-    ]
-}"""
-
-@app.put("item/{item_id}")
-async def update_item(item: BaseItem, item_id: int):
-    results = {"item": item, "item_id": item_id}
-
-@app.post("/offers")
-async def create_offer(offer: Offer):
-    return Offer
-
-@app.post("/images/multiple")
-async def create_multiple_images(images: list[Image]):
-    return images
-
-@app.post("/index-weights/")
-async def create_index_weights(weights: dict[int, float]):
-    return weights
