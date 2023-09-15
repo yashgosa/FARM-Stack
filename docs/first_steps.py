@@ -5,10 +5,12 @@ GET: to read data.
 PUT: to update data.
 DELETE: to delete data."""
 # =========> Main Code <=========
-from fastapi import FastAPI, Query, Path, Body  # FastAPI is a Python class that provides all the functionality for your API.
+from fastapi import FastAPI, Cookie, Query, Path, Body  # FastAPI is a Python class that provides all the functionality for your API.
 from enum import Enum
 from pydantic import BaseModel, HttpUrl, Field #WARNING: Notice that Field is imported directly from pydantic, not from fastapi as are all the rest (Query, Path, Body, etc).
 from typing import Annotated
+from datetime import date, datetime, time, timedelta
+from uuid import UUID
 
 app = FastAPI()
 # ======================================================
@@ -264,4 +266,62 @@ app = FastAPI()
 #     return weights
 
 # =========> Declare Request Example Data <=========
+# class Item(BaseModel):
+#     name: str = Field(examples=["Foo"])
+#     description: str | None = Field(examples=["A very long Text"])
+#     price: float = Field(examples=[3])
+#     tax: float | None = Field(examples=[2.0])
+#
+#     model_config = {
+#         "json_extra_schema": {
+#             "examples": [
+#                 {
+#                     "name": "Foo",
+#                     "description": "A long text",
+#                     "price": 21.32,
+#                     "tax": 23.32,
+#                  }
+#             ]
+#         }
+#     }
+#
+# @app.put("/items/{item_id}")
+# async def update_item(
+#         item_id: int, item: Annotated[Item, Body(examples=[{
+#             "name": "Foo",
+#             "description": "A long text",
+#             "price": 21.32,
+#             "tax": 23.32,
+#         }])] #You can of course also pass multiple examples
+# ): #You can declare the OpenAPI-specific examples in FastAPI with the parameter openapi_examples
+#     return {"item_id": item_id, "item": item}
 
+# =========> Extra Data Types <=========
+#
+# @app.put("/items/{item_id}")
+# async def read_items(
+#         item_id: Annotated[UUID | None, Body()] = None,
+#         start_datetime: Annotated[datetime | None, Body()] = None,
+#         end_datetime : Annotated[datetime | None, Body()] = None,
+#         repeat_at: Annotated[time | None, Body()] = None,
+#         process_after: Annotated[timedelta | None, Body()] = None,
+# ):
+#     start_process = start_datetime + process_after
+#     duration = end_datetime - start_process
+#     return {
+#         "item_id": item_id,
+#         "start_datetime": start_datetime,
+#         "end_datetime": end_datetime,
+#         "repeat_at": repeat_at,
+#         "process_after": process_after,
+#         "start_process": start_process,
+#         "duration": duration,
+#     }
+
+# =========> Cookie Parameters <=========
+
+@app.get("/items")
+async def read_items(ads_id: Annotated[str | None, Cookie()] = None):
+    return {"ads_id": ads_id}
+
+# =========> Cookie Parameters <=========
