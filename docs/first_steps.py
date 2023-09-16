@@ -1,3 +1,6 @@
+#%%
+
+#%%
 # FastAPI generates a "schema" with all your API using the OpenAPI standard for defining APIs.
 
 """POST: to create data.
@@ -7,8 +10,8 @@ DELETE: to delete data."""
 # =========> Main Code <=========
 from fastapi import FastAPI, Cookie, Header, Query, Path, Body, Response  # FastAPI is a Python class that provides all the functionality for your API.
 from enum import Enum
-from pydantic import BaseModel, HttpUrl, Field #WARNING: Notice that Field is imported directly from pydantic, not from fastapi as are all the rest (Query, Path, Body, etc).
-from typing import Annotated, Any
+from pydantic import EmailStr, BaseModel, HttpUrl, Field #WARNING: Notice that Field is imported directly from pydantic, not from fastapi as are all the rest (Query, Path, Body, etc).
+from typing import Annotated, Any, Union
 from datetime import date, datetime, time, timedelta
 from uuid import UUID
 from fastapi.responses import  JSONResponse, RedirectResponse
@@ -333,79 +336,162 @@ app = FastAPI()
 
 # =========> Response Model - Return Type <=========
 
-class BaseItem(BaseModel):
-    name: str
-    price: int
-    tax: int | None = None
-    description: str | None = None
-    tags: list[str] = []
-
-@app.post('/items')
-async def add_item(item: BaseItem) -> BaseItem:
-    return item
-
-#If you declare both a return type and a response_model, the response_model will take priority and be used by FastAPI.
-
-@app.get("/items", response_model=list[BaseItem])
-async def get_item() -> Any:
-    return [
-        {"name": "yash", "price": 32},
-        {"name": "sai", 'price': 322},
-    ]
-
-class BaseUser(BaseModel):
-    username: str
-    email: str
-    fullname: str | None = None
-class UserIn(BaseUser):
-    password: str
-
-# class UserOut(BaseModel):
+# class BaseItem(BaseModel):
+#     name: str
+#     price: int
+#     tax: int | None = None
+#     description: str | None = None
+#     tags: list[str] = []
+#
+# @app.post('/items')
+# async def add_item(item: BaseItem) -> BaseItem:
+#     return item
+#
+# #If you declare both a return type and a response_model, the response_model will take priority and be used by FastAPI.
+#
+# @app.get("/items", response_model=list[BaseItem])
+# async def get_item() -> Any:
+#     return [
+#         {"name": "yash", "price": 32},
+#         {"name": "sai", 'price': 322},
+#     ]
+#
+# class BaseUser(BaseModel):
 #     username: str
 #     email: str
 #     fullname: str | None = None
-
-# @app.post("/user", response_model= UserOut)
-@app.post("/user")
-async def create_user(user: UserIn) -> BaseUser:
-    return user
-
-@app.get('/portal')
-async def get_portal(teleport: bool = False) -> Response:
-    if teleport:
-        return RedirectResponse(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-    return JSONResponse(content={"message": "Here's your interdimensional portal."})
-
-@app.get('/foo', response_model=None)
-async def foo(bar: bool = False) -> JSONResponse | dict:
-    return JSONResponse(content={"Foo": "bar"})
-
+# class UserIn(BaseUser):
+#     password: str
+#
+# # class UserOut(BaseModel):
+# #     username: str
+# #     email: str
+# #     fullname: str | None = None
+#
+# # @app.post("/user", response_model= UserOut)
+# @app.post("/user")
+# async def create_user(user: UserIn) -> BaseUser:
+#     return user
+#
+# @app.get('/portal')
+# async def get_portal(teleport: bool = False) -> Response:
+#     if teleport:
+#         return RedirectResponse(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+#     return JSONResponse(content={"message": "Here's your interdimensional portal."})
+#
+# @app.get('/foo', response_model=None)
+# async def foo(bar: bool = False) -> JSONResponse | dict:
+#     return JSONResponse(content={"Foo": "bar"})
+#
+# # items = {
+# #     "foo": {"name": "Foo", "price": 50.2},
+# #     "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+# #     "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+# # }
+#
 # items = {
 #     "foo": {"name": "Foo", "price": 50.2},
-#     "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
-#     "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+#     "bar": {"name": "Bar", "description": "The Bar fighters", "price": 62, "tax": 20.2},
+#     "baz": {
+#         "name": "Baz",
+#         "description": "There goes my baz",
+#         "price": 50.2,
+#         "tax": 10.5,
+#     },
 # }
+#
+# app.get("/items/{item_id}/name",
+#         response_model= BaseItem,
+#         response_model_include= {"name", "description"})
+# async def read_item(item_id: str):
+#     return items[item_id]
+#
+# app.get("/items/{item_id}/public",
+#         response_model= BaseItem,
+#         response_model_exclude= {"tax"})  #If you forget to use a set and use a list or tuple instead, FastAPI will still convert it to a set and it will work correctly:
+# async def read_item_public(item_id: str):
+#     return items[item_id]
 
-items = {
-    "foo": {"name": "Foo", "price": 50.2},
-    "bar": {"name": "Bar", "description": "The Bar fighters", "price": 62, "tax": 20.2},
-    "baz": {
-        "name": "Baz",
-        "description": "There goes my baz",
-        "price": 50.2,
-        "tax": 10.5,
-    },
-}
+# =========> Extra Models <=========
 
-app.get("/items/{item_id}/name",
-        response_model= BaseItem,
-        response_model_include= {"name", "description"})
-async def read_item(item_id: str):
-    return items[item_id]
+# class UserIn(BaseModel):
+#     name: str
+#     password: str
+#     email: str
+#     full_name: str | None = None
+#
+# class UserOut(BaseModel):
+#     name: str
+#     email: str
+#     full_name: str | None
+#
+# class UserDB(BaseModel):
+#     name: str
+#     hashed_password: str
+#     email: str
+#     full_name: str | None
 
-app.get("/items/{item_id}/public",
-        response_model= BaseItem,
-        response_model_exclude= {"tax"})  #If you forget to use a set and use a list or tuple instead, FastAPI will still convert it to a set and it will work correctly:
-async def read_item_public(item_id: str):
-    return items[item_id]
+# class UserBase(BaseModel):
+#     username: str
+#     email: EmailStr
+#     full_name: str | None = None
+#
+#
+# class UserIn(UserBase):
+#     password: str
+#
+#
+# class UserOut(UserBase):
+#     pass
+#
+#
+# class UserDB(UserBase):
+#     hashed_password: str
+#
+# def fask_hasher(raw_password: str):
+#     return "YASH" + raw_password
+#
+# def save_fake_user(userIn: UserIn):
+#     hashed_password = fask_hasher(userIn.password)
+#     userDB = UserDB(**userIn.model_dump(), hashed_password=hashed_password)
+#     print("User saved ... Not Really")
+#     return userDB
+#
+# @app.post("/user/", response_model=UserOut)
+# async def create_user(user_in: UserIn):
+#     user_saved = save_fake_user(user_in)
+#     return user_saved
+#
+# # user_in = UserIn(name="john", password="secret", email="john.doe@example.com")
+# # user_dict = user_in.model_dump()
+# # print(UserIn(**user_dict))
+# # print(UserIn(**user_in.model_dump()))
+#
+# class BaseItem(BaseModel):
+#     description: str
+#     type: str
+#
+#
+# class CarItem(BaseItem):
+#     type: str = "car"
+#
+#
+# class PlaneItem(BaseItem):
+#     type: str = "plane"
+#     size: int
+#
+# items = {
+#     "item1": {"description": "All my friends drive a low rider", "type": "car"},
+#     "item2": {
+#         "description": "Music is my aeroplane, it's my aeroplane",
+#         "type": "plane",
+#         "size": 5,
+#     },
+# }
+#
+# app.get('/items/{item_id}', response_model=PlaneItem | CarItem)
+# async def read_item(item_id: str):
+#     return items[item_id]
+
+# =========> Response Status Code <=========
 
