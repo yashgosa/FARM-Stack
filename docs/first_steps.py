@@ -8,7 +8,7 @@ GET: to read data.
 PUT: to update data.
 DELETE: to delete data."""
 # =========> Main Code <=========
-from fastapi import FastAPI, Cookie, Header, Query, Path, Body, Response  # FastAPI is a Python class that provides all the functionality for your API.
+from fastapi import FastAPI, Form, Cookie, Header, Query, Path, Body, Response, status # FastAPI is a Python class that provides all the functionality for your API.
 from enum import Enum
 from pydantic import EmailStr, BaseModel, HttpUrl, Field #WARNING: Notice that Field is imported directly from pydantic, not from fastapi as are all the rest (Query, Path, Body, etc).
 from typing import Annotated, Any, Union
@@ -469,15 +469,15 @@ app = FastAPI()
 #
 # class BaseItem(BaseModel):
 #     description: str
-#     type: str
+#     tyspe: strss
 #
 #
 # class CarItem(BaseItem):
-#     type: str = "car"
+#     tsype: str = "car"
 #
 #
 # class PlaneItem(BaseItem):
-#     type: str = "plane"
+#     stype: str = "plane"
 #     size: int
 #
 # items = {
@@ -494,4 +494,11 @@ app = FastAPI()
 #     return items[item_id]
 
 # =========> Response Status Code <=========
+# @app.post('/items/', status_code= status.HTTP_201_CREATED)
+# def create_item(name: str):
+#     return {"name": name}
+
+# =========> Form Data <=========
+
+
 
