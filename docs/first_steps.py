@@ -5,12 +5,13 @@ GET: to read data.
 PUT: to update data.
 DELETE: to delete data."""
 # =========> Main Code <=========
-from fastapi import FastAPI, Cookie, Query, Path, Body  # FastAPI is a Python class that provides all the functionality for your API.
+from fastapi import FastAPI, Cookie, Header, Query, Path, Body, Response  # FastAPI is a Python class that provides all the functionality for your API.
 from enum import Enum
 from pydantic import BaseModel, HttpUrl, Field #WARNING: Notice that Field is imported directly from pydantic, not from fastapi as are all the rest (Query, Path, Body, etc).
-from typing import Annotated
+from typing import Annotated, Any
 from datetime import date, datetime, time, timedelta
 from uuid import UUID
+from fastapi.responses import  JSONResponse, RedirectResponse
 
 app = FastAPI()
 # ======================================================
@@ -320,8 +321,91 @@ app = FastAPI()
 
 # =========> Cookie Parameters <=========
 
-@app.get("/items")
-async def read_items(ads_id: Annotated[str | None, Cookie()] = None):
-    return {"ads_id": ads_id}
+# @app.get("/items")
+# async def read_items(ads_id: Annotated[str | None, Cookie()] = None):
+#     return {"ads_id": ads_id}
 
-# =========> Cookie Parameters <=========
+# =========> Header Parameters <=========
+#
+# @app.get('/items')
+# async def read_items(user_agent: Annotated[list[str] | None, Header(convert_underscores=False)]= None):
+#     return {"user_agent": user_agent}
+
+# =========> Response Model - Return Type <=========
+
+class BaseItem(BaseModel):
+    name: str
+    price: int
+    tax: int | None = None
+    description: str | None = None
+    tags: list[str] = []
+
+@app.post('/items')
+async def add_item(item: BaseItem) -> BaseItem:
+    return item
+
+#If you declare both a return type and a response_model, the response_model will take priority and be used by FastAPI.
+
+@app.get("/items", response_model=list[BaseItem])
+async def get_item() -> Any:
+    return [
+        {"name": "yash", "price": 32},
+        {"name": "sai", 'price': 322},
+    ]
+
+class BaseUser(BaseModel):
+    username: str
+    email: str
+    fullname: str | None = None
+class UserIn(BaseUser):
+    password: str
+
+# class UserOut(BaseModel):
+#     username: str
+#     email: str
+#     fullname: str | None = None
+
+# @app.post("/user", response_model= UserOut)
+@app.post("/user")
+async def create_user(user: UserIn) -> BaseUser:
+    return user
+
+@app.get('/portal')
+async def get_portal(teleport: bool = False) -> Response:
+    if teleport:
+        return RedirectResponse(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    return JSONResponse(content={"message": "Here's your interdimensional portal."})
+
+@app.get('/foo', response_model=None)
+async def foo(bar: bool = False) -> JSONResponse | dict:
+    return JSONResponse(content={"Foo": "bar"})
+
+# items = {
+#     "foo": {"name": "Foo", "price": 50.2},
+#     "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+#     "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+# }
+
+items = {
+    "foo": {"name": "Foo", "price": 50.2},
+    "bar": {"name": "Bar", "description": "The Bar fighters", "price": 62, "tax": 20.2},
+    "baz": {
+        "name": "Baz",
+        "description": "There goes my baz",
+        "price": 50.2,
+        "tax": 10.5,
+    },
+}
+
+app.get("/items/{item_id}/name",
+        response_model= BaseItem,
+        response_model_include= {"name", "description"})
+async def read_item(item_id: str):
+    return items[item_id]
+
+app.get("/items/{item_id}/public",
+        response_model= BaseItem,
+        response_model_exclude= {"tax"})  #If you forget to use a set and use a list or tuple instead, FastAPI will still convert it to a set and it will work correctly:
+async def read_item_public(item_id: str):
+    return items[item_id]
+
