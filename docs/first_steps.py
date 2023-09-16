@@ -8,13 +8,13 @@ GET: to read data.
 PUT: to update data.
 DELETE: to delete data."""
 # =========> Main Code <=========
-from fastapi import FastAPI, Form, Cookie, Header, Query, Path, Body, Response, status # FastAPI is a Python class that provides all the functionality for your API.
+from fastapi import FastAPI, Form, Cookie, Header, Query, Path, Body, Response, status, File, UploadFile # FastAPI is a Python class that provides all the functionality for your API.
 from enum import Enum
 from pydantic import EmailStr, BaseModel, HttpUrl, Field #WARNING: Notice that Field is imported directly from pydantic, not from fastapi as are all the rest (Query, Path, Body, etc).
 from typing import Annotated, Any, Union
 from datetime import date, datetime, time, timedelta
 from uuid import UUID
-from fastapi.responses import  JSONResponse, RedirectResponse
+from fastapi.responses import  JSONResponse, RedirectResponse, HTMLResponse
 
 app = FastAPI()
 # ======================================================
@@ -499,7 +499,37 @@ app = FastAPI()
 #     return {"name": name}
 
 # =========> Form Data <=========
-@app.post('/login/')
-async def login(username: Annotated[str , Form()], password: Annotated[str, Form()]):
-    return {"username": username}
+# @app.post('/login/')
+# async def login(username: Annotated[str , Form()], password: Annotated[str, Form()]):
+#     return {"username": username}
 
+# =========> Request Files <=========
+@app.post("/files/")
+async def get_size(file: Annotated[list[bytes] | None, File(description="Long Text")] = None):
+    if not file:
+        return {"message": "No file sent"}
+    else:
+        return {"file_sizes": [len(f) for f in file]}
+
+
+@app.post("/uploadfiles/")
+async def create_files(files: Annotated[list[UploadFile] | None, File(description="Long Text")] = None):
+    if not files:
+        return {"message": "No upload file sent"}
+    else:
+        return {"filenames": [file.filename for file in files]}
+
+@app.get('/')
+async def main():
+    content = """<body>
+                <form action="/files/" enctype="multipart/form-data" method="post">
+                <input name="files" type="file" multiple>
+                <input type="submit">
+                </form>
+                <form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+                <input name="files" type="file" multiple>
+                <input type="submit">
+                </form>
+                </body>"""
+
+    return HTMLResponse(content)
